@@ -1,5 +1,11 @@
 <?php defined('C5_EXECUTE') or die("Access Denied.");
 
+/**
+ * Custom Contact Form version 2.0, by Jordan Lev
+ *
+ * See https://github.com/jordanlev/c5_custom_contact_form for instructions
+ */
+
 $vth = Loader::helper('validation/token');
 if (!$vth->validate()) {
 	$errors = array(t('Invalid form submission -- please reload the page and try again.'));

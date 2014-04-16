@@ -1,4 +1,12 @@
-<?php defined('C5_EXECUTE') or die("Access Denied."); ?>
+<?php defined('C5_EXECUTE') or die("Access Denied.");
+
+/**
+ * Custom Contact Form version 2.0, by Jordan Lev
+ *
+ * See https://github.com/jordanlev/c5_custom_contact_form for instructions
+ */
+
+?>
 		
 <div class="ccm-ui">
 	<div class="form-horizontal">

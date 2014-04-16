@@ -1,5 +1,11 @@
 <?php defined('C5_EXECUTE') or die("Access Denied.");
 
+/**
+ * Custom Contact Form version 2.0, by Jordan Lev
+ *
+ * See https://github.com/jordanlev/c5_custom_contact_form for instructions
+ */
+
 $dh = Loader::helper('concrete/dashboard');
 $th = Loader::helper('text');
 $form = Loader::helper('form');
