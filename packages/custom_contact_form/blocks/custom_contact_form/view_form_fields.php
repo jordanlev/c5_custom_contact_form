@@ -54,4 +54,4 @@ echo $form->select('topic', $topic_options, null, array('placeholder' => 'Choose
 
 <br />
 
-<?php echo $form->submit('submit', 'Submit'); ?>
+<?php echo $form->submit('submit-form', 'Submit'); ?>
