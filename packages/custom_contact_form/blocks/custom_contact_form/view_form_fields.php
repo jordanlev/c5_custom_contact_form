@@ -18,6 +18,10 @@ $form = Loader::helper('form');
  *    you should still have a <label> that is "visuallyhidden" for screenreaders,
  *    AND another <label> inside a <noscript> tag for non-JS people on browsers
  *    that lack native support for the placeholder attribute!
+ *  ~ Note that we're not using the C5 form helper for the submit button,
+ *    because we don't want a "name" attribute on it. If you want to add a name attribute,
+ *    be careful not to use the name "submit", as this might cause problems with javascript
+ *    (because it trounces the built-in form.submit() method)!
  */
 ?>
 
@@ -54,4 +58,4 @@ echo $form->select('topic', $topic_options, null, array('placeholder' => 'Choose
 
 <br />
 
-<?php echo $form->submit('submit', 'Submit'); ?>
+<input type="submit" value="Submit" />
