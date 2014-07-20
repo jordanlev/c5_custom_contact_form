@@ -44,7 +44,7 @@ class DashboardReportsCustomContactFormController extends Controller {
 				'"' . $submission['ip_address'] . '"',
 			);
 			foreach ($fields as $name => $label) {
-				$quoted_values[] = str_replace('"', '""', $submission['fields'][$name]);
+				$quoted_values[] = '"' . str_replace('"', '""', $submission['fields'][$name]) . '"';
 			}
 			echo implode(',', $quoted_values) . "\n";
 		}
