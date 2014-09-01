@@ -49,6 +49,7 @@ The biggest limitation (other than the fact that users cannot configure form fie
    * Change these file/directory names:
       * `packages/custom_contact_form/`
       * `packages/custom_contact_form/blocks/custom_contact_form/`
+      * `packages/custom_contact_form/models/custom_contact_form.php`
       * `packages/custom_contact_form/controllers/dashboard/reports/custom_contact_form.php`
       * `packages/custom_contact_form/single_pages/dashboard/reports/custom_contact_form.php`
    * Then find/replace the following strings in the package code with appropriate replacements:
