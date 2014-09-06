@@ -162,6 +162,10 @@ class CustomContactFormSubmission {
 		foreach ($post as $name => $value) {
 			//"whitelist" the fields we grab from POST (because it is unsafe to save arbitrary data submitted by the user)
 			if (array_key_exists($name, CustomContactForm::$fields)) {
+				if (is_array($value)) {
+					$value = implode(", ", $value);
+				}
+				
 				$this->fields[$name] = $value;
 			}
 		}
