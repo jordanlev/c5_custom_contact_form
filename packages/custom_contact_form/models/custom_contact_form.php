@@ -223,7 +223,7 @@ class CustomContactFormSubmission {
 		foreach ($post as $name => $value) {
 			//"whitelist" the fields we grab from POST (because it is unsafe to save arbitrary data submitted by the user)
 			if (array_key_exists($name, $this->field_defs)) {
-				$this->field_values[$name] = $value;
+				$this->field_values[$name] = is_array($value) ? implode(', ', $value) : $value; //arrays indicate a checkbox list, so concatenate those into 1 comma-separated string
 			}
 		}
 		
