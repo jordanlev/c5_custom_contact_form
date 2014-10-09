@@ -1,7 +1,7 @@
 <?php defined('C5_EXECUTE') or die("Access Denied.");
 
 /**
- * Custom Contact Form version 2.0, by Jordan Lev
+ * Custom Contact Form version 3.0, by Jordan Lev
  *
  * See https://github.com/jordanlev/c5_custom_contact_form for instructions
  */
@@ -10,9 +10,9 @@ class CustomContactFormPackage extends Package {
 
 	protected $pkgHandle = 'custom_contact_form';
 	public function getPackageName() { return t('Custom Contact Form'); }
-	public function getPackageDescription() { return t('Highly customizable contact form block.'); }
+	public function getPackageDescription() { return t('Highly customizable contact forms.'); }
 	protected $appVersionRequired = '5.6';
-	protected $pkgVersion = '2.0';
+	protected $pkgVersion = '3.0';
 	
 	public function install() {
 		$pkg = parent::install();

@@ -1,0 +1,10 @@
+#custom_contact_form_submissions {
+	width: 100%;
+	overflow-x: scroll;
+	margin-bottom: 10px;
+}
+
+#custom_contact_form_submissions th,
+#custom_contact_form_submissions td {
+	white-space: nowrap;
+}

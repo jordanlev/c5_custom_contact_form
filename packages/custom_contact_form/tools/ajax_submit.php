@@ -9,12 +9,17 @@
 $vth = Loader::helper('validation/token');
 if (!$vth->validate()) {
 	$errors = array(t('Invalid form submission -- please reload the page and try again.'));
-} else if (empty($_POST['bID']) || (intval($_POST['bID']) != $_POST['bID'])) {
-	$errors = array(t('Invalid form submission -- please reload the page and try again'));
+} else if (empty($_POST['bID']) || !(int)$_POST['bID']) {
+	$errors = array(t('Invalid form submission. Please reload the page and try again.')); //slightly different message to help with debugging in case of error
 } else {
 	$b = Block::GetById($_POST['bID']);
-	$bc = new CustomContactFormBlockController($b);
-	$errors = $bc->processForm(true);
+	if ($b) {
+		$bc = new CustomContactFormBlockController($b);
+		$cID = empty($_POST['cID']) ? 0 : (int)$_POST['cID'];
+		$errors = $bc->processForm($cID)->getList(); //processForm() returns a c5 error object, on which we can call the getList() function
+	} else {
+		$errors = array(t('Invalid form submission. Please reload the page and try again'));
+	}
 }
 
 //Send response

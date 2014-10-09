@@ -17,9 +17,8 @@ It is up to you (the designer) to write the form field markup, but everything el
 * One form field can be designated as the "reply-to" address for notification emails
 * Dashboard reporting of all form submissions (with the ability to delete old submissions when the list grows too large)
 * CSV download of all submissions from dashboard
-
-## Limitations
-The biggest limitation (other than the fact that users cannot configure form fields themselves) is that this package only gives you 1 contact form. You can place the contact form block on as many pages of the site as you want, but each of those blocks will always display the same exact form (and all form submissions get logged to the same list). If you need to display different custom forms on your site, you'll need to copy the package and change the various names and handles -- see instructions below.
+* (New in version 3.0): you can define more than 1 kind of contact form per site!
+* (New in version 3.0): the page that a form was submitted from is saved and reported
 
 ## Installation / Customization
 
@@ -28,10 +27,9 @@ The biggest limitation (other than the fact that users cannot configure form fie
    to your site's top-level `packages` directory (note: this is an entire package,
    not just a block -- so you must install the entire package and not just the block).
 
-2. Define form fields and validation rules by modifying the package's `/models/custom_contact_form.php` file.
+2. Define forms, fields and validation rules by modifying the package's `/models/custom_contact_form.php` file.
 
-3. Customize form markup by modifying the package's `/blocks/custom_contact_form/view_form_fields.php` file.
-
+3. Customize form markup by adding/editing template files in the package's `/blocks/custom_contact_form/view_form_fields/` directory.
 
 ### Optional Steps
 4. If you want to change the template for the notification email, modify the package's `/mail/admin_notify.php`.
@@ -44,16 +42,6 @@ The biggest limitation (other than the fact that users cannot configure form fie
 6. Add a `view.css` file to the package's `/blocks/custom_contact_form/` directory
    (although I recommend just putting the form styles in your theme css instead to reduce http requests).
 
-7. If you want to change the name of the package and/or block
-   (which I don't recommend unless you need two different custom form blocktypes on one site):
-   * Change these file/directory names:
-      * `packages/custom_contact_form/`
-      * `packages/custom_contact_form/blocks/custom_contact_form/`
-      * `packages/custom_contact_form/models/custom_contact_form.php`
-      * `packages/custom_contact_form/controllers/dashboard/reports/custom_contact_form.php`
-      * `packages/custom_contact_form/single_pages/dashboard/reports/custom_contact_form.php`
-   * Then find/replace the following strings in the package code with appropriate replacements:
-      * "custom_contact_form"
-      * "Custom Contact Form"
-      * "CustomContactForm"
-      * "custom-contact-form"
+## Notes
+* If you are already using an older version of this package on your site, note that it is **NOT** easily upgradeable to this latest version 3.0. You should only use this package on sites that don't already have an older version of `custom_contact_form` installed.
+* The block has caching disabled (because otherwise errors and success messages do not get displayed). This might prevent Concrete5's "full page chacheing" from working (depending on how you have caching set in the dashboard), so depending on your caching strategy you might not want to put this form on every page of your site.

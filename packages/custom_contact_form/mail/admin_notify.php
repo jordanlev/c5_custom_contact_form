@@ -1,8 +1,11 @@
 <?php defined('C5_EXECUTE') or die("Access Denied.");
 
-$subject = '['.SITE.'] New Contact Form Submission';
+$subject = 'New Website Form Submission: ' . $form_title;
 
-$body = "A new submission has been made to the contact form:\n\n";
+$body = 'Submitted on ' . date('n/j/y \a\t g:ia', $timestamp) . ' from page "' . $page_title . '":' . "\n\n";
 foreach ($fields as $name => $field) {
 	$body .= "{$field['label']}: {$field['value']}\n";
 }
+$body .= "\n----\n";
+$body .= "You can view all form submissions from the website dashboard:\n";
+$body .= $dashboard_url;

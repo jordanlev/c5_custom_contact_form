@@ -1,7 +1,7 @@
 <?php defined('C5_EXECUTE') or die("Access Denied.");
 
 /**
- * Custom Contact Form version 2.0, by Jordan Lev
+ * Custom Contact Form version 3.0, by Jordan Lev
  *
  * See https://github.com/jordanlev/c5_custom_contact_form for instructions
  */
@@ -18,6 +18,7 @@ $(document).ready(function() {
 		'dataType': 'json',
 		'data': {
 			'bID': <?php echo $bID; ?>,
+			'cID': <?php echo Page::getCurrentPage()->getCollectionID(); ?>,
 			'ccm_token': '<?php echo Loader::helper('validation/token')->generate(); ?>'
 		 },
 		'beforeSubmit': function() {
@@ -76,7 +77,7 @@ $(document).ready(function() {
 
 	<form method="post" action="<?php echo $this->action('submit'); ?>">
 		
-		<?php $this->inc('view_form_fields.php'); ?>
+		<?php $this->inc($form_fields_template); ?>
 		
 		<?php /* Spam honeypot fields
 			DEV NOTES about spam honeypot fields:

@@ -3,8 +3,11 @@
 
 	<table name="custom_contact_form_submissions">
 		<field name="id" type="I"><UNSIGNED/><KEY/><AUTOINCREMENT/></field>
+		<field name="form_key" type="C" size="255"><NOTNULL/></field>
 		<field name="submitted_at" type="T"><NOTNULL/></field>
 		<field name="ip_address" type="C" size="255" />
+		<field name="page_cID" type="I"><UNSIGNED/></field>
+		<field name="page_title" type="C" size="500"></field>
 	</table>
 	
 	<table name="custom_contact_form_submission_fields">
