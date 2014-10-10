@@ -7,7 +7,6 @@
  */
 
 $dh = Loader::helper('concrete/dashboard');
-$th = Loader::helper('text');
 $form = Loader::helper('form');
 ?>
 
@@ -78,12 +77,12 @@ $form = Loader::helper('form');
 						//don't bother loading collection object for every row -- just cheat and use index.php?cID=xxx urls
 						$url = DIR_REL . '/' . DISPATCHER_FILENAME . '?cID=' . $submission['page_cID'];
 						echo '<a href="' . $url . '" target="_blank">';
-						echo $th->entities($submission['page_title']);
+						echo $submission['page_title']; //this has already been html-escaped
 						echo '</a>';
 					?></td>
 					<td><?php echo $submission['ip_address']; ?></td>
 					<?php foreach ($fields as $name => $label): ?>
-						<td><?php echo nl2br($th->entities($submission['fields'][$name])); ?></td>
+						<td><?php echo $submission['fields'][$name]; /* value has already been html-escaped */ ?></td>
 					<?php endforeach; ?>
 				</tr>
 				<?php endforeach; ?>

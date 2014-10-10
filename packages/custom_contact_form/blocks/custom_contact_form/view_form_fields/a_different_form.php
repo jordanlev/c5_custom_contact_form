@@ -68,11 +68,4 @@ $form = Loader::helper('form');
 
 <br>
 
-<label>
-	Headshot Photo:
-	<?php echo $form->file('headshot'); ?>
-</label>
-
-<br>
-
 <input type="submit" value="Submit" />

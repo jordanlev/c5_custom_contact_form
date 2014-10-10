@@ -44,7 +44,7 @@ class DashboardReportsCustomContactFormController extends Controller {
 		}
 		
 		$this->set('fields', CustomContactForm::getFieldNamesAndLabelsForDashboardReport($form_key));
-		$this->set('submissions', CustomContactForm::getSubmissionsForDashboardReport($form_key));
+		$this->set('submissions', CustomContactForm::getSubmissionsForDashboardView($form_key));
 
 		$this->addHeaderItem(Loader::helper('html')->css('dashboard.css', 'custom_contact_form'));
 	}
@@ -54,7 +54,7 @@ class DashboardReportsCustomContactFormController extends Controller {
 		header('Content-Disposition: attachment; filename="' . $form_key . '_form_submissions.csv"');
 
 		$fields = CustomContactForm::getFieldNamesAndLabelsForDashboardReport($form_key);
-		$submissions = CustomContactForm::getSubmissionsForDashboardReport($form_key);
+		$submissions = CustomContactForm::getSubmissionsForDashboardExport($form_key);
 		
 		//heading row
 		echo '"' . t('Submitted At') . '","' . t('From Page') . '","' . t('IP Address') . '","' . implode('","', $fields) . '"' . "\r\n";

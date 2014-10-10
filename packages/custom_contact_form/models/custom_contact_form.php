@@ -137,12 +137,17 @@ class CustomContactForm {
 	}
 	
 	public static function hasFileFields($form_key) {
-		foreach (self::$forms[$form_key]['fields'] as $field) {
+		return (bool)count(self::getFileFieldNames($form_key));
+	}
+	
+	public static function getFileFieldNames($form_key) {
+		$file_field_names = array();
+		foreach (self::$forms[$form_key]['fields'] as $name => $field) {
 			if (!empty($field['fileset'])) {
-				return true;
+				$file_field_names[] = $name;
 			}
 		}
-		return false;
+		return $file_field_names;
 	}
 	
 	public static function getReplyToFieldName($form_key) {
@@ -166,7 +171,15 @@ class CustomContactForm {
 		return $fields;
 	}
 	
-	public static function getSubmissionsForDashboardReport($form_key) {
+	public static function getSubmissionsForDashboardView($form_key) {
+		return self::getSubmissionsForDashboard($form_key, true);
+	}
+	
+	public static function getSubmissionsForDashboardExport($form_key) {
+		return self::getSubmissionsForDashboard($form_key, false);
+	}
+	
+	private static function getSubmissionsForDashboard($form_key, $field_values_as_escaped_html) {
 		$sql = 'SELECT *'
 		     . ' FROM custom_contact_form_submissions s'
 		     . ' INNER JOIN custom_contact_form_submission_fields f'
@@ -177,7 +190,8 @@ class CustomContactForm {
 		$records = Loader::db()->GetArray($sql, $vals);
 		
 		$include_field_names = array_keys(self::getFieldNamesAndLabelsForDashboardReport($form_key));
-
+		$file_field_names = self::getFileFieldNames($form_key);
+		
 		$submissions = array();
 		foreach ($records as $record) {
 			$id = $record['id'];
@@ -192,9 +206,23 @@ class CustomContactForm {
 				);
 			}
 			
+			$th = Loader::helper('text');
 			$field_name = $record['field_name'];
 			if (in_array($field_name, $include_field_names)) {
-				$submissions[$id]['fields'][$field_name] = $record['field_value'];
+				$field_value = $record['field_value'];
+				if (!empty($field_value) && in_array($field_name, $file_field_names)) {
+					$file = File::getByID($field_value);
+					if (!empty($file->error)) {
+						$field_value = t('[missing file]');
+					} else if ($field_values_as_escaped_html) {
+						$field_value = '<a href="' . View::url('/download_file', $file->getFileID()) . '" target="_blank">' . $th->entities($file->getFileName()) . '</a>';
+					} else {
+						$field_value = $file->getFileName();
+					}
+				} else if ($field_values_as_escaped_html) {
+					$field_value = nl2br($th->entities($field_value));
+				}
+				$submissions[$id]['fields'][$field_name] = $field_value;
 			}
 		}
 		
@@ -425,13 +453,18 @@ class CustomContactFormSubmission {
 	
 	//Returns array of fields, each of which is an array containing a 'label' and a 'value'.
 	//Fields marked as 'exclude_from_notification' are excluded.
-	public function getNotificationEmailFields() {
+	public function getNotificationEmailFieldLabelsAndValues() {
 		$fields = array();
 		foreach ($this->field_defs as $name => $field_def) {
 			if (empty($field_def['exclude_from_notification'])) {
+				$value = $this->field_values[$name];
+				if (!empty($value) && !empty($field_def['fileset'])) {
+					$file = File::getByID($value);
+					$value = empty($file->error) ? (BASE_URL . View::url('/download_file', $file->getFileID()) . ' (' . $file->getFileName() . ')') : t('[missing file]');
+				}
 				$fields[$name] = array(
 					'label' => $field_def['label'],
-					'value' => $this->field_values[$name],
+					'value' => $value,
 				);
 			}
 		}
