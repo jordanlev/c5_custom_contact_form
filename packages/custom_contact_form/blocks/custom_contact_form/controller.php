@@ -13,7 +13,7 @@ class CustomContactFormBlockController extends BlockController {
 	protected $btName = 'Contact Form';
 	protected $btTable = 'btCustomContactForm';
 	protected $btInterfaceWidth = "750";
-	protected $btInterfaceHeight = "250";
+	protected $btInterfaceHeight = "350";
 	
 	protected $btCacheBlockRecord = true;
 	//Do not cache the output -- it will prevent thanks/error messages from being displayed!
