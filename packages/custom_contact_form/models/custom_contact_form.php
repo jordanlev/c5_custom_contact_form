@@ -354,7 +354,9 @@ class CustomContactFormSubmission {
 				}
 				
 				if ($file_info['error'] == UPLOAD_ERR_NO_FILE) {
-					$e->add(t('%s is required', $field_label));
+					if (!empty($field_def['required'])) {
+						$e->add(t('%s is required', $field_label));
+					}
 					continue;
 				}
 				
