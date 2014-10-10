@@ -28,12 +28,15 @@ class CustomContactFormBlockController extends BlockController {
 	}
 	
 	public function view() {
-		$form_fields_template_relative_path = "/view_form_fields/{$this->form_key}.php";
-		$form_fields_template_absolute_path = dirname(__FILE__) . $form_fields_template_relative_path;
-		if (!file_exists($form_fields_template_absolute_path)) {
-			throw new Exception(t('Custom Contact Form Error: Missing form fields template file %s', $form_fields_template_absolute_path));
+		$fields_template_relative_path = "/view_form_fields/{$this->form_key}.php";
+		$fields_template_absolute_path = dirname(__FILE__) . $fields_template_relative_path;
+		if (!file_exists($fields_template_absolute_path)) {
+			throw new Exception(t('Custom Contact Form Error: Missing form fields template file %s', $fields_template_absolute_path));
 		}
-		$this->set('form_fields_template', $form_fields_template_relative_path);
+		$this->set('fields_template', $fields_template_relative_path);
+		
+		$has_files = CustomContactForm::hasFileFields($this->form_key);
+		$this->set('has_files', $has_files);
 		
 		$this->set('showThanks', (!empty($_GET['thanks']) && ($_GET['thanks'] == $this->bID)));
 		
@@ -92,7 +95,7 @@ class CustomContactFormBlockController extends BlockController {
 	// OR by the ajax tool. We must have page_cID passed in because the ajax tool cannot call
 	// Page::getCurrentPage() (so it must get the cID itself via form hidden field).
 	public function processForm($page_cID = 0) {
-		$submission = new CustomContactFormSubmission($this->form_key, $_POST, $page_cID);
+		$submission = new CustomContactFormSubmission($this->form_key, $page_cID);
 		$error = $submission->validate();
 		if (!$error->has()) {
 			$submission->save();

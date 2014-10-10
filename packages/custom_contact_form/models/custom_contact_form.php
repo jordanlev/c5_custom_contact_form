@@ -19,6 +19,11 @@ class CustomContactForm {
 	 * Each field in the list must have a key that matches the html input "name"
 	 * (as per the form markup), followed by an array of settings.
 	 *
+	 * NOTE: The settings below only to PROCESSING form submissions, NOT the form display!
+	 *       It is entirely up to you to output the html markup for each field
+	 *       by creating/editing files in the block's /view_form_fields/ folder.
+	 *
+	 *
 	 * Available settings for each field:
 	 *
 	 *  'label': Human-readable field name that gets displayed in error messages,
@@ -47,11 +52,29 @@ class CustomContactForm {
 	 *           is an email address (does a *very* loose validation -- only checks
 	 *           for an "@" symbol and a "." period).
 	 *
-	 * NOTE: This info pertains only to PROCESSING form submissions, NOT the form display!
-	 *       It is entirely up to you to output the html markup for each field
-	 *       by creating/editing files in the block's /view_form_fields/ folder.
+	 *  'fileset': The existence of this setting on a field denotes that it is a file upload.
+	 *             The setting should be the name of a file set. Valid uploaded files will be
+	 *             saved to the file manager and placed in this file set. It is highly recommended
+	 *             that you restrict access to this file set via advanced permissions!
+	 *
+	 *             Note that Concrete5 has a list of allowed file types, which you can configure here:
+	 *             `Dashboard > System & Settings > Permissions & Access > Allowed File Types`
+	 *             Users will only be allowed to upload files having extensions in this list!
+	 *
+	 *  'maxbytes': Max file size (in bytes) for file uploads. Note that this doesn't override
+	 *              php's `upload_max_filesize` or `post_max_size` settings.
+	 *
+	 *  NOTE THAT IF YOU ARE ALLOWING FILE UPLOADS, YOU SHOULD ENABLED ADVANCED PERMISSIONS
+	 *  AND RESTRICT ACCESS TO THE FILE SET THAT YOU ARE ADDING THE FILES TO!!!
+	 *  ...
+	 *  Why? Because files in the file manager are always publicly viewable by default!
+	 *  It is not difficult for someone to guess that a download url of
+	 *  http://example.com/download_file/47 (for example) could be changed
+	 *  to something like /download_file/48 or /download_file/49.
+	 *  Hence you should set permissions on the file set so that only admins can view its files
+	 *  (and the only way to assign permissions to a file set is by enabling "advanced permissions").
 	 */
-	public static $forms_and_fields = array(
+	public static $forms = array(
 		'my_first_form' => array(
 			'title' => 'My First Form',
 			'fields' => array(
@@ -75,6 +98,7 @@ class CustomContactForm {
 				'city' => array('label' => 'City'),
 				'state' => array('label' => 'State'),
 				'zip' => array('label' => 'ZIP Code'),
+				'proposal' => array('label' => 'Proposal', 'required' => true, 'maxbytes' => 2000000, 'fileset' => 'Uploaded Proposals'), //<--REMEMBER TO ENABLE ADVANCED PERMISSIONS AND RESTRICT ACCESS TO THE FILE SET!
 			),
 		),
 		
@@ -106,15 +130,24 @@ class CustomContactForm {
 	public static function getFormKeysAndTitles($sanitize_titles = true) {
 		$th = Loader::helper('text');
 		$keys_and_titles = array();
-		foreach (self::$forms_and_fields as $key => $info) {
+		foreach (self::$forms as $key => $info) {
 			$keys_and_titles[$key] = $sanitize_titles ? $th->entities($info['title']) : $info['title'];
 		}
 		return $keys_and_titles;
 	}
 	
+	public static function hasFileFields($form_key) {
+		foreach (self::$forms[$form_key]['fields'] as $field) {
+			if (!empty($field['fileset'])) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public static function getReplyToFieldName($form_key) {
 		$field_name = '';
-		foreach (self::$forms_and_fields[$form_key]['fields'] as $name => $field) {
+		foreach (self::$forms[$form_key]['fields'] as $name => $field) {
 			if (!empty($field['reply_to'])) {
 				$field_name = $name;
 				break;
@@ -125,7 +158,7 @@ class CustomContactForm {
 	
 	public static function getFieldNamesAndLabelsForDashboardReport($form_key) {
 		$fields = array();
-		foreach (self::$forms_and_fields[$form_key]['fields'] as $name => $field) {
+		foreach (self::$forms[$form_key]['fields'] as $name => $field) {
 			if (empty($field['exclude_from_dashboard'])) {
 				$fields[$name] = $field['label'];
 			}
@@ -209,7 +242,7 @@ class CustomContactFormSubmission {
 	private $honeypot_blank_field_value = null;
 	private $honeypot_retained_field_value = null;
 	
-	public function __construct($form_key, $post, $page_cID) {
+	public function __construct($form_key, $page_cID) {
 		$this->form_key = $form_key;
 		
 		$this->submitted_at = date('Y-m-d H:i:s');
@@ -217,50 +250,112 @@ class CustomContactFormSubmission {
 		$this->page_cID = (int)$page_cID;
 		$page = Page::getByID($this->page_cID);
 		$this->page_title = $page->getCollectionID() ? $page->getCollectionName() : t('[unknown page]');
-
-		$this->field_defs = $this->isFormKeyValid() ? CustomContactForm::$forms_and_fields[$this->form_key]['fields'] : array();
 		
-		foreach ($post as $name => $value) {
+		$this->field_defs = $this->isFormKeyValid() ? CustomContactForm::$forms[$this->form_key]['fields'] : array();
+		
+		foreach ($_POST as $name => $value) {
 			//"whitelist" the fields we grab from POST (because it is unsafe to save arbitrary data submitted by the user)
 			if (array_key_exists($name, $this->field_defs)) {
 				$this->field_values[$name] = is_array($value) ? implode(', ', $value) : $value; //arrays indicate a checkbox list, so concatenate those into 1 comma-separated string
 			}
 		}
 		
-		if (array_key_exists(CustomContactForm::$honeypot_blank_field_name, $post)) {
-			$this->honeypot_blank_field_value = $post[CustomContactForm::$honeypot_blank_field_name];
+		foreach ($_FILES as $name => $file) {
+			//"whitelist" files too (and make sure the field is actually defined as a file upload by checking for the 'fileset' setting)
+			if (array_key_exists($name, $this->field_defs) && !empty($this->field_defs[$name]['fileset'])) {
+				$this->field_values[$name] = $file;
+			}
 		}
 		
-		if (array_key_exists(CustomContactForm::$honeypot_retained_field_name, $post)) {
-			$this->honeypot_retained_field_value = $post[CustomContactForm::$honeypot_retained_field_name];
+		if (array_key_exists(CustomContactForm::$honeypot_blank_field_name, $_POST)) {
+			$this->honeypot_blank_field_value = $_POST[CustomContactForm::$honeypot_blank_field_name];
+		}
+		
+		if (array_key_exists(CustomContactForm::$honeypot_retained_field_name, $_POST)) {
+			$this->honeypot_retained_field_value = $_POST[CustomContactForm::$honeypot_retained_field_name];
 		}
 	}
 	
 	public function validate() {
 		$e = Loader::helper('validation/error');
+		$fh = Loader::helper('validation/file');
 		
 		if (!$this->isFormKeyValid()) {
 			$e->add(t('Cannot identify form. Please reload the page and try again.'));
 		}
 		
 		foreach ($this->field_defs as $name => $field_def) {
-			$field_is_set = array_key_exists($name, $this->field_values);
-			$field_is_empty = empty($this->field_values[$name]);
-			$field_value = $field_is_set ? $this->field_values[$name] : null;
+			
 			$field_label = empty($field_def['label']) ? $name : $field_def['label'];
 			
-			if (!empty($field_def['required']) && $field_is_empty) {
-				$e->add(t('%s is required', $field_label));
-			}
+			if (empty($field_def['fileset'])) {
+				$field_is_set = array_key_exists($name, $this->field_values);
+				$field_is_empty = empty($this->field_values[$name]);
+				$field_value = $field_is_set ? $this->field_values[$name] : null;
 			
-			if ($field_is_set && !$field_is_empty) {
-				$maxlength = array_key_exists('maxlength', $field_def) ? (int)$field_def['maxlength'] : 250;
-				if ($maxlength && (strlen($field_value) > $maxlength)) {
-					$e->add(t('%s cannot exceed %d characters in length', $field_label, $maxlength));
+				if (!empty($field_def['required']) && $field_is_empty) {
+					$e->add(t('%s is required', $field_label));
+				}
+			
+				if ($field_is_set && !$field_is_empty) {
+					$maxlength = array_key_exists('maxlength', $field_def) ? (int)$field_def['maxlength'] : 250;
+					if ($maxlength && (strlen($field_value) > $maxlength)) {
+						$e->add(t('%s cannot exceed %d characters in length', $field_label, $maxlength));
+					}
+				
+					if (!empty($field_def['email']) && !preg_match("/^\S+@\S+\.\S+$/", $field_value)) { //see: http://stackoverflow.com/questions/201323/what-is-the-best-regular-expression-for-validating-email-addresses#201447
+						$e->add(t('%s is not a valid email address', $field_label));
+					}
+				}
+			
+			//file upload...
+			} else {
+				//handle this case now so as to simplify other logic below
+				if (empty($this->field_values[$name])) {
+					if (!empty($field_def['required'])) {
+						$e->add(t('%s is required', $field_label));
+					}
+					continue;
 				}
 				
-				if (!empty($field_def['email']) && !preg_match("/^\S+@\S+\.\S+$/", $field_value)) { //see: http://stackoverflow.com/questions/201323/what-is-the-best-regular-expression-for-validating-email-addresses#201447
-					$e->add(t('%s is not a valid email address', $field_label));
+				$file_info = $this->field_values[$name];
+				$file_info_is_valid = is_array($file_info) && isset($file_info['error']) && !is_array($file_info['error']);
+				if (!$file_info_is_valid) {
+					$e->add(t('%s is invalid', $field_label));
+					continue;
+				}
+				
+				if ($file_info['error'] == UPLOAD_ERR_NO_FILE) {
+					$e->add(t('%s is required', $field_label));
+					continue;
+				}
+				
+				if (($file_info['error'] == UPLOAD_ERR_INI_SIZE) || ($file_info['error'] == UPLOAD_ERR_FORM_SIZE)) {
+					$e->add(t('%s file size is too large', $field_label));
+					continue;
+				}
+				
+				if ($file_info['error'] != UPLOAD_ERR_OK) {
+					$e->add(t('%s is invalid', $field_label));
+					continue;
+				}
+				
+				if (!is_uploaded_file($file_info['tmp_name'])) {
+					$e->add(t('%s is invalid', $field_label));
+					continue;
+				}
+				
+				if (!$fh->file($file_info['tmp_name'])) {
+					$e->add(t('%s is invalid', $field_label));
+					continue;
+				}
+				
+				if (!$fh->extension($file_info['name'])) {
+					$e->add(t('%s file extension is not allowed', $field_label));
+				}
+				
+				if (!empty($field_def['maxbytes']) && ($file_info['size'] > $field_def['maxbytes'])) {
+					$e->add(t('%s file size is too large', $field_label));
 				}
 			}
 		}
@@ -287,6 +382,12 @@ class CustomContactFormSubmission {
 	}
 	
 	public function save() {
+		//re-validate just in case...
+		$e = $this->validate();
+		if ($e->has()) {
+			throw new Exception(t('Error: Cannot save form data because it is invalid'));
+		}
+		
 		$db = Loader::db();
 		
 		$submission_data = array(
@@ -296,13 +397,14 @@ class CustomContactFormSubmission {
 			'page_cID' => $this->page_cID,
 			'page_title' => $this->page_title,
 		);
-		
 		$db->AutoExecute('custom_contact_form_submissions', $submission_data, 'INSERT');
 		$id = $db->Insert_ID();
 		
-		$sql = 'DELETE FROM custom_contact_form_submission_fields WHERE submission_id = ?';
-		$vals = array((int)$id);
-		$db->Execute($sql, $vals);
+		//Put uploaded files into the file manager.
+		//We must do this before saving the fields' records to the db,
+		// because we need the file id's to save as the fields' values.
+		$this->importUploadedFiles();
+		
 		foreach ($this->field_values as $name => $value) {
 			//no need to check against the field definitions
 			// because fields were already "whitelisted" in the constructor
@@ -344,11 +446,47 @@ class CustomContactFormSubmission {
 	}
 	
 	public function getFormTitle() {
-		return $this->isFormKeyValid() ? CustomContactForm::$forms_and_fields[$this->form_key]['title'] : t('[unknown form]');
+		return $this->isFormKeyValid() ? CustomContactForm::$forms[$this->form_key]['title'] : t('[unknown form]');
 	}
 	
 	private function isFormKeyValid() {
-		return !empty($this->form_key) && array_key_exists($this->form_key, CustomContactForm::$forms_and_fields);
+		return !empty($this->form_key) && array_key_exists($this->form_key, CustomContactForm::$forms);
 	}
 	
+	//VERY IMPORTANT: MAKE SURE YOU HAVE VALIDATED ALL FILES BEFORE CALLING THIS!!!
+	private function importUploadedFiles() {
+		foreach ($this->field_defs as $name => $field_def) {
+			if (!empty($field_def['fileset'])) {
+				if (!empty($this->field_values[$name])) {
+					//Okay! Now that we've established that this field is a file upload
+					// and that something was uploaded, we want to do some sanity checks
+					// and if all is well, import the uploaded file to the file manager,
+					// add it to the desired file set, and then put the file ID into this object's
+					// values array (so the file ID is what gets saved to the database record).
+					
+					$file_info = $this->field_values[$name];
+					$this->field_values[$name] = null; //do this now in case one of our sanity checks below fails
+					
+					if (!is_array($file_info) || empty($file_info['tmp_name']) || empty($file_info['name'])) {
+						continue;
+					}
+					
+					$fs = FileSet::getByName($field_def['fileset']);
+					if (empty($fs)) {
+						continue;
+					}
+					
+					$fi = new FileImporter();
+					$f = $fi->import($file_info['tmp_name'], $file_info['name']);
+					if (!($f instanceof FileVersion)) {
+						continue;
+					}
+					
+					$fs->addFileToSet($f);
+					$this->field_values[$name] = $f->getFileID();
+				}
+			}
+		}
+	}
+
 }

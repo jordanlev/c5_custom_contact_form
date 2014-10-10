@@ -17,8 +17,8 @@ It is up to you (the designer) to write the form field markup, but everything el
 * One form field can be designated as the "reply-to" address for notification emails
 * Dashboard reporting of all form submissions (with the ability to delete old submissions when the list grows too large)
 * CSV download of all submissions from dashboard
-* (New in version 3.0): you can define more than 1 kind of contact form per site!
-* (New in version 3.0): the page that a form was submitted from is saved and reported
+* (New in version 3.0): you can define more than 1 type of form per site!
+* (New in version 3.0): file uploads (saved to a file set)!
 
 ## Installation / Customization
 
@@ -32,16 +32,29 @@ It is up to you (the designer) to write the form field markup, but everything el
 3. Customize form markup by adding/editing template files in the package's `/blocks/custom_contact_form/view_form_fields/` directory.
 
 ### Optional Steps
-4. If you want to change the template for the notification email, modify the package's `/mail/admin_notify.php`.
+4. If you have any file upload fields, create the file set that they should be saved to
+  and then set permissions on that file set so only admin users can view its files
+  ("advanced permissions" must be enabled in order for you to set permissions on the file set
+  as a whole -- I know it's not ideal to have to enable this just for one little thing,
+  but if you don't do this then all uploaded files will be publicly viewable!)
 
-5. If you're not using "placeholders" in your form fields html,
+5. If you want to change the template for the notification email, modify the package's `/mail/admin_notify.php`.
+
+6. If you're not using "placeholders" in your form fields html,
   delete the package's `/blocks/custom_contact_form/js/jquery.placeholder.min.js` file,
   and delete the two lines of code containing the word "placeholder"
   in the package's `/blocks/custom_contact_form/view.php` file.
 
-6. Add a `view.css` file to the package's `/blocks/custom_contact_form/` directory
-   (although I recommend just putting the form styles in your theme css instead to reduce http requests).
+7. Add a `view.css` file to the package's `/blocks/custom_contact_form/` directory
+  (although I recommend just putting the form styles in your theme css instead to reduce http requests).
 
 ## Notes
-* If you are already using an older version of this package on your site, note that it is **NOT** easily upgradeable to this latest version 3.0. You should only use this package on sites that don't already have an older version of `custom_contact_form` installed.
-* The block has caching disabled (because otherwise errors and success messages do not get displayed). This might prevent Concrete5's "full page chacheing" from working (depending on how you have caching set in the dashboard), so depending on your caching strategy you might not want to put this form on every page of your site.
+* If you are already using an older version of this package on your site,
+  note that it is **NOT** easily upgradeable to this latest version 3.0.
+  You should only use this package on sites that don't already have
+  an older version of `custom_contact_form` installed.
+* The block has caching disabled (because otherwise errors and success messages
+  do not get displayed). This might prevent Concrete5's "full page chacheing"
+  from working (depending on how you have caching set in the dashboard),
+  so depending on your caching strategy you might not want to put this form
+ on every page of your site.

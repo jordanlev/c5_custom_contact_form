@@ -61,4 +61,18 @@ $form = Loader::helper('form');
 
 <br />
 
+<label>
+	Project Proposal:
+	<?php echo $form->file('proposal'); ?>
+</label>
+
+<br>
+
+<label>
+	Headshot Photo:
+	<?php echo $form->file('headshot'); ?>
+</label>
+
+<br>
+
 <input type="submit" value="Submit" />

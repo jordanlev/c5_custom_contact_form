@@ -75,9 +75,9 @@ $(document).ready(function() {
 		</ul>
 	</div>
 
-	<form method="post" action="<?php echo $this->action('submit'); ?>">
+	<form method="post" action="<?php echo $this->action('submit'); ?>" <?php echo $has_files ? 'enctype="multipart/form-data"' : ''; ?>>
 		
-		<?php $this->inc($form_fields_template); ?>
+		<?php $this->inc($fields_template); ?>
 		
 		<?php /* Spam honeypot fields
 			DEV NOTES about spam honeypot fields:
