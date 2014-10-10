@@ -38,7 +38,7 @@ class CustomContactFormBlockController extends BlockController {
 		$has_files = CustomContactForm::hasFileFields($this->form_key);
 		$this->set('has_files', $has_files);
 		
-		$this->set('showThanks', (!empty($_GET['thanks']) && ($_GET['thanks'] == $this->bID)));
+		$this->set('show_thanks', (!empty($_GET['thanks']) && ($_GET['thanks'] == $this->bID)));
 		
 		$this->set('honeypot_blank_field_name', CustomContactForm::$honeypot_blank_field_name);
 		$this->set('honeypot_blank_field_label', CustomContactForm::$honeypot_blank_field_label);

@@ -3,7 +3,7 @@
 	
 	<table name="btCustomContactForm">
 		<field name="bID" type="I"><KEY /><UNSIGNED /></field>
-		<field name="form_key" type="C" size="255"><NOTNULL/></field>
+		<field name="form_key" type="C" size="100"><NOTNULL/></field>
 		<field name="notification_email_from" type="C" size="255"></field>
 		<field name="notification_email_to" type="X"></field>
 		<field name="thanks_msg" type="X"></field>

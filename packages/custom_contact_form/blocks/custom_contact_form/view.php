@@ -62,7 +62,7 @@ $(document).ready(function() {
 
 <div id="<?php echo $dom_id; ?>" class="custom-contact-form">
 
-	<div class="success" style="display:<?php echo $showThanks ? 'block' : 'none'; ?>;">
+	<div class="success" style="display:<?php echo $show_thanks ? 'block' : 'none'; ?>;">
 		<?php echo nl2br($thanks_msg); ?>
 	</div>
 
