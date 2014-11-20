@@ -24,12 +24,13 @@ It is up to you (the designer) to write the form field markup, but everything el
 
 ### Required Steps
 1. Move the `custom_contact_form` directory from this repo's `packages` directory
-   to your site's top-level `packages` directory (note: this is an entire package,
-   not just a block -- so you must install the entire package and not just the block).
+   to your site's top-level `packages` directory.
 
-2. Define forms, fields and validation rules by modifying the package's `/models/custom_contact_form.php` file.
+2. Install the addon via Dashboard > Extend Concrete5 > Install.
 
-3. Customize form markup by adding/editing template files in the package's `/blocks/custom_contact_form/view_form_fields/` directory.
+3. Define forms, fields and validation rules by modifying the package's `/models/custom_contact_form.php` file.
+
+4. Customize form markup by adding/editing template files in the package's `/blocks/custom_contact_form/view_form_fields/` directory. (Note that template file names must match the "form key", e.g. the `my_example` form must have template file named `my_example.php`).
 
 ### Optional Steps
 4. If you have any file upload fields, create the file set that they should be saved to
