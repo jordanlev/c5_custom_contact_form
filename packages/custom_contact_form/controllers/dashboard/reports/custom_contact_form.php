@@ -76,7 +76,7 @@ class DashboardReportsCustomContactFormController extends Controller {
 				$value = str_replace("\n", "\r\n", $value);
 				
 				//escape quotes
-				$value = str_replace('"', '""', $submission['fields'][$name]);
+				$value = str_replace('"', '""', $value);
 				
 				//surround value in quotes
 				$value = '"' . $value . '"';
