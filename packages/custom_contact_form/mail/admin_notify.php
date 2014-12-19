@@ -6,6 +6,4 @@ $body = 'Submitted on ' . date('n/j/y \a\t g:ia', $timestamp) . ' from page "' .
 foreach ($fields as $name => $field) {
 	$body .= "{$field['label']}: {$field['value']}\n";
 }
-$body .= "\n----\n";
-$body .= "You can view all form submissions from the website dashboard:\n";
-$body .= $dashboard_url;
+$body .= "\n";

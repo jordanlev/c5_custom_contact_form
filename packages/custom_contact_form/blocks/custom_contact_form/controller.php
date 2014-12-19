@@ -117,7 +117,6 @@ class CustomContactFormBlockController extends BlockController {
 		$mh->addParameter('form_title', $submission->getFormTitle());
 		$mh->addParameter('timestamp', strtotime($submission->getSubmittedAt()));
 		$mh->addParameter('page_title', $submission->getPageTitle());
-		$mh->addParameter('dashboard_url', BASE_URL . View::url('/dashboard/reports/custom_contact_form', $submission->getFormKey()));
 		$mh->addParameter('fields', $submission->getNotificationEmailFieldLabelsAndValues());
 		$mh->load('admin_notify', 'custom_contact_form');
 
