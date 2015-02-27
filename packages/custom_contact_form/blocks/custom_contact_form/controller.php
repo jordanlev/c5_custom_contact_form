@@ -33,6 +33,8 @@ class CustomContactFormBlockController extends BlockController {
 		if (!file_exists($fields_template_absolute_path)) {
 			throw new Exception(t('Custom Contact Form Error: Missing form fields template file %s', $fields_template_absolute_path));
 		}
+		$this->set('formClass', $this->form_key);
+		
 		$this->set('fields_template', $fields_template_relative_path);
 		
 		$has_files = CustomContactForm::hasFileFields($this->form_key);
