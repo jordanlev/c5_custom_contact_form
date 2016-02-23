@@ -48,9 +48,7 @@ class CustomContactForm {
 	 *               but I don't recommend that (better to set it to an arbitrarily
 	 *               high value, like 5000 or 10000).
 	 *
-	 *  'email': Set this to true if you want to validate that a submitted value
-	 *           is an email address (does a *very* loose validation -- only checks
-	 *           for an "@" symbol and a "." period).
+	 *  'email': Set this to true if you want to validate that a submitted value is an email address.
 	 *
 	 *  'fileset': The existence of this setting on a field denotes that it is a file upload.
 	 *             The setting should be the name of a file set. Valid uploaded files will be
@@ -331,7 +329,7 @@ class CustomContactFormSubmission {
 						$e->add(t('%s cannot exceed %d characters in length', $field_label, $maxlength));
 					}
 				
-					if (!empty($field_def['email']) && !preg_match("/^\S+@\S+\.\S+$/", $field_value)) { //see: http://stackoverflow.com/questions/201323/what-is-the-best-regular-expression-for-validating-email-addresses#201447
+					if (!empty($field_def['email']) && !filter_var($field_value, FILTER_VALIDATE_EMAIL)) {
 						$e->add(t('%s is not a valid email address', $field_label));
 					}
 				}
