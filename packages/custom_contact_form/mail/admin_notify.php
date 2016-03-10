@@ -8,7 +8,7 @@ $bodyHTML = '<p>' . $th->entities($body) . '</p><table><tbody>' . "\n";
 
 foreach ($fields as $name => $field) {
 	$body .= "{$field['label']}: {$field['value']}\n";
-	$bodyHTML .= '<tr><td align="right">' . $th->entities($field['label']) . ':</td><td>' . $th->entities($field['value']) . '</td></tr>'. "\n";
+	$bodyHTML .= '<tr><td align="right" valign="top">' . $th->entities($field['label']) . ':</td><td>' . nl2br($th->entities($field['value'])) . '</td></tr>'. "\n";
 }
 $body .= "\n";
 $bodyHTML .= "</tbody></table>\n";
