@@ -75,7 +75,7 @@ $(document).ready(function() {
 		</ul>
 	</div>
 
-	<form method="post" action="<?php echo $this->action('submit'); ?>" <?php echo $has_files ? 'enctype="multipart/form-data"' : ''; ?>>
+	<form novalidate method="post" action="<?php echo $this->action('submit'); ?>" <?php echo $has_files ? 'enctype="multipart/form-data"' : ''; ?>>
 		
 		<?php $this->inc($fields_template); ?>
 		
