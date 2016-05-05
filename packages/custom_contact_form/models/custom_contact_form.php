@@ -1,7 +1,7 @@
 <?php defined('C5_EXECUTE') or die("Access Denied.");
 
 /**
- * Custom Contact Form version 3.0, by Jordan Lev
+ * Custom Contact Form version 3.1, by Jordan Lev
  *
  * See https://github.com/jordanlev/c5_custom_contact_form for instructions
  */
@@ -50,6 +50,20 @@ class CustomContactForm {
 	 *
 	 *  'email': Set this to true if you want to validate that a submitted value is an email address.
 	 *
+	 *  'akismet_name': If using akismet for spam prevention, set this to true on the field
+	 *                  containing the submitter's name. If you have more than 1 name field
+	 *                  (e.g. first, last), then set this to a sequential number (start with 1)
+	 *                  on all fields that make up the full name (e.g. the first name would be
+	 *                  `'akismet_name' => 1`, last name would be `'akismet_name' => 2`, etc)
+	 *                  so we can concatenate them in the proper order.
+	 *  'akismet_email': If using akismet for spam prevention, set this to true on the field
+	 *                   containing the submitter's email address.
+	 *  'akismet_content': If using akismet for spam prevention, set this to true on the field
+	 *                     containing the message or content. If you have more than 1 field
+	 *                     that comprises the content, set this to a sequential number (start with 1)
+	 *                     on each field so we can concatenate them in the proper order.
+	 *  (NOTE that `CUSTOM_CONTACT_FORM_AKISMET_API_KEY` must be set in config/site.php to use akismet!)
+	 *
 	 *  'fileset': The existence of this setting on a field denotes that it is a file upload.
 	 *             The setting should be the name of a file set. Valid uploaded files will be
 	 *             saved to the file manager and placed in this file set. It is highly recommended
@@ -76,10 +90,10 @@ class CustomContactForm {
 		'my_first_form' => array(
 			'title' => 'My First Form',
 			'fields' => array(
-				'name' => array('label' => 'Name', 'required' => true),
-				'email' => array('label' => 'Email', 'required' => true, 'email' => true, 'reply_to' => true),
+				'name' => array('label' => 'Name', 'required' => true, 'akismet_name' => true),
+				'email' => array('label' => 'Email', 'required' => true, 'email' => true, 'reply_to' => true, 'akismet_email' => true),
 				'topic' => array('label' => 'Topic', 'required' => true),
-				'message' => array('label' => 'Message', 'maxlength' => 5000),
+				'message' => array('label' => 'Message', 'maxlength' => 5000, 'akismet_content' => true),
 				'subscribe' => array('label' => 'Subscribe'),
 			),
 		),
@@ -88,9 +102,9 @@ class CustomContactForm {
 		'a_different_form' => array(
 			'title' => 'A Different Form',
 			'fields' => array(
-				'first_name' => array('label' => 'First Name', 'required' => true),
-				'last_name' => array('label' => 'Last Name', 'required' => true),
-				'email' => array('label' => 'Email', 'required' => true, 'email' => true, 'reply_to' => true),
+				'first_name' => array('label' => 'First Name', 'required' => true, 'akismet_name' => 1),
+				'last_name' => array('label' => 'Last Name', 'required' => true, 'akismet_name' => 2),
+				'email' => array('label' => 'Email', 'required' => true, 'email' => true, 'reply_to' => true, 'akismet_email' => true),
 				'phone' => array('label' => 'Phone #'),
 				'address' => array('label' => 'Street Address'),
 				'city' => array('label' => 'City'),
@@ -396,10 +410,8 @@ class CustomContactFormSubmission {
 		if (!empty($this->honeypot_blank_field_value)) {
 			$e->add(t('ERROR: You must leave the "%s" field blank (this helps us prevent spam)', CustomContactForm::$honeypot_blank_field_label));
 		}
-		
-		if ($this->honeypot_retained_field_value !== CustomContactForm::$honeypot_retained_field_value) {
-			$e->add('Internal Server Error'); //don't give a descriptive error message for this -- it's most likely a spambot
-		}
+		//note that we save the "retained_field_value" check for the isSpam() function,
+		// because we don't want to give an error message if that fails
 		
 		//Note that we don't have to validate CSRF tokens ourselves
 		// because C5 handles it for us via the $this->action() function.
@@ -407,6 +419,76 @@ class CustomContactFormSubmission {
 		//Note that we don't validate page_cID because it's not essential information.
 		
 		return $e;
+	}
+	
+	public function isSpam() {
+		if ($this->honeypot_retained_field_value !== CustomContactForm::$honeypot_retained_field_value) {
+			return true;
+		}
+		
+		if (defined('CUSTOM_CONTACT_FORM_AKISMET_API_KEY') && !empty(CUSTOM_CONTACT_FORM_AKISMET_API_KEY)) {
+			$submitter_names = array();
+			$submitter_email = '';
+			$submitter_contents = array();
+			
+			foreach ($this->field_defs as $name => $field_def) {
+				$field_value = array_key_exists($name, $this->field_values) ? $this->field_values[$name] : null;
+				if (empty($field_value)) {
+					continue;
+				} else if (!empty($field_def['akismet_name'])) {
+					$submitter_names[(int)$field_def['akismet_name']] = $field_value;
+				} else if (!empty($field_def['akismet_email'])) {
+					$submitter_email = $field_value;
+				} else if (!empty($field_def['akismet_content'])) {
+					$submitter_contents[(int)$field_def['akismet_content']] = $field_value;
+				}
+			}
+			
+			ksort($submitter_names);
+			ksort($submitter_contents);
+			
+			$submitter_name = trim(implode(' ', $submitter_names));
+			$submitter_email = trim($submitter_email);
+			$submitter_content = trim(implode("\n", $submitter_contents));
+			
+			if ($this->akismetSpamCheck(CUSTOM_CONTACT_FORM_AKISMET_API_KEY, $submitter_name, $submitter_email, $submitter_content)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	private function akismetSpamCheck($api_key, $submitter_name, $submitter_email, $submitter_content) {
+		$page_url = '';
+		$page = Page::getByID($this->page_cID);
+		if ($page->getCollectionID()) {
+			$page_url = Loader::helper('navigation')->getLinkToCollection($page, true); //pass true as 2nd arg to prepend base url
+		}
+		
+		$post = http_build_query(array(
+			'blog' => BASE_URL . DIR_REL,
+			'user_ip' => $this->ip_address,
+			'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+			'referrer' => $_SERVER['HTTP_REFERER'],
+			'permalink' => $page_url,
+			'comment_type' => 'contact-form',
+			'comment_author' => $submitter_name,
+			'comment_author_email' => $submitter_email,
+			'comment_content' => $submitter_content,
+		));
+		
+		$url = "https://$api_key.rest.akismet.com/1.1/comment-check";
+		
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true );
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true );
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+		$result = curl_exec($ch);
+		
+		return ($result !== 'false'); //akismet api returns string "false" if not spam
 	}
 	
 	public function save() {

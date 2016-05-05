@@ -1,7 +1,7 @@
 <?php defined('C5_EXECUTE') or die("Access Denied.");
 
 /**
- * Custom Contact Form version 3.0, by Jordan Lev
+ * Custom Contact Form version 3.1, by Jordan Lev
  *
  * See https://github.com/jordanlev/c5_custom_contact_form for instructions
  */
@@ -22,38 +22,40 @@ $form = Loader::helper('form');
  */
 ?>
 
-<?php echo $form->label('name', 'Name:'); ?>
-<?php echo $form->text('name', null, array('placeholder' => 'Name')); ?>
+<div>
+	<?php echo $form->label('name', 'Name:'); ?>
+	<?php echo $form->text('name', null, array('placeholder' => 'Name')); ?>
+</div>
 
-<br />
+<div>
+	<?php echo $form->label('email', 'Email:'); ?>
+	<?php echo $form->text('email', null, array('placeholder' => 'Email')); ?>
+</div>
 
-<?php echo $form->label('email', 'Email:'); ?>
-<?php echo $form->text('email', null, array('placeholder' => 'Email')); ?>
+<div>
+	<?php echo $form->label('topic', 'Choose:'); ?>
+	<?php
+	$topic_options = array(
+		'' => '-- Choose One --',
+		'First Topic' => 'First Topic',
+		'Second Topic' => 'Second Topic',
+		'Third Topic' => 'Third Topic',
+	);
+	echo $form->select('topic', $topic_options, null, array('placeholder' => 'Choose'));
+	?>
+</div>
 
-<br />
+<div>
+	<?php echo $form->label('message', 'Message:'); ?>
+	<?php echo $form->textarea('message', null, array('placeholder' => 'Message')); ?>
+</div>
 
-<?php echo $form->label('topic', 'Choose:'); ?>
-<?php
-$topic_options = array(
-	'' => '-- Choose One --',
-	'First Topic' => 'First Topic',
-	'Second Topic' => 'Second Topic',
-	'Third Topic' => 'Third Topic',
-);
-echo $form->select('topic', $topic_options, null, array('placeholder' => 'Choose'));
-?>
+<div>
+	<input type="hidden" name="subscribe" value="no">
+	<?php echo $form->checkbox('subscribe', 'yes', null, array('placeholder' => 'Sign Up For Our Newsletter')); ?>
+	<?php echo $form->label('subscribe', 'Sign Up For Our Newsletter'); ?>
+</div>
 
-<br />
-
-<?php echo $form->label('message', 'Message:'); ?>
-<?php echo $form->textarea('message', null, array('placeholder' => 'Message')); ?>
-
-<br />
-
-<input type="hidden" name="subscribe" value="no">
-<?php echo $form->checkbox('subscribe', 'yes', null, array('placeholder' => 'Sign Up For Our Newsletter')); ?>
-<?php echo $form->label('subscribe', 'Sign Up For Our Newsletter'); ?>
-
-<br />
-
-<input type="submit" value="Submit" />
+<div>
+	<button>Submit</button>
+</div>

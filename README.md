@@ -9,16 +9,17 @@ Use this when you want to have complete control over the styling of your site's 
 It is up to you (the designer) to write the form field markup, but everything else is handled automatically by the addon:
 
 * Block can be placed on any page in the site
+* Multiple custom forms per site
 * Basic form field validation (required, max length, email format) with error message display
+* File uploads (saved to a file set)
 * User-customizable "thank-you" message upon success
 * Ajax form submission (but also completely functional without javascript enabled)
 * Basic spam honeypot using hidden empty fields (no ugly CAPTCHA!)
+* Akismet (spam filtering service) integration
 * Email notifications (with a customizable email template)
 * One form field can be designated as the "reply-to" address for notification emails
 * Dashboard reporting of all form submissions (with the ability to delete old submissions when the list grows too large)
 * CSV download of all submissions from dashboard
-* (New in version 3.0): you can define more than 1 type of form per site!
-* (New in version 3.0): file uploads (saved to a file set)!
 
 ## Installation / Customization
 
@@ -48,6 +49,9 @@ It is up to you (the designer) to write the form field markup, but everything el
 
 7. Add a `view.css` file to the package's `/blocks/custom_contact_form/` directory
   (although I recommend just putting the form styles in your theme css instead to reduce http requests).
+
+8. To enable [Akismet](https://akismet.com/) for spam filtering, you must get an API key from them, then add this to your site's `config/site.php` file: `define('CUSTOM_CONTACT_FORM_AKISMET_API_KEY', 'your-api-key-goes-here');`.
+
 
 ## Notes
 * If you are already using an older version of this package on your site,

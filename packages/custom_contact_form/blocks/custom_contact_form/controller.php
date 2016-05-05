@@ -1,7 +1,7 @@
 <?php defined('C5_EXECUTE') or die("Access Denied.");
 
 /**
- * Custom Contact Form version 3.0, by Jordan Lev
+ * Custom Contact Form version 3.1, by Jordan Lev
  *
  * See https://github.com/jordanlev/c5_custom_contact_form for instructions
  */
@@ -98,8 +98,13 @@ class CustomContactFormBlockController extends BlockController {
 		$submission = new CustomContactFormSubmission($this->form_key, $page_cID);
 		$error = $submission->validate();
 		if (!$error->has()) {
-			$submission->save();
-			$this->sendNotificationEmail($submission);
+			//Spam check is a separate validation
+			// because we don't want to check unless everything else is valid
+			// and if it is spam we don't want to display an error message.
+			if (!$submission->isSpam()) {
+				$submission->save();
+				$this->sendNotificationEmail($submission);
+			}
 		}
 		return $error;
 	}
