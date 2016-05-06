@@ -426,7 +426,7 @@ class CustomContactFormSubmission {
 			return true;
 		}
 		
-		if (defined('CUSTOM_CONTACT_FORM_AKISMET_API_KEY') && !empty(CUSTOM_CONTACT_FORM_AKISMET_API_KEY)) {
+		if (defined('CUSTOM_CONTACT_FORM_AKISMET_API_KEY') && CUSTOM_CONTACT_FORM_AKISMET_API_KEY) {
 			$submitter_names = array();
 			$submitter_email = '';
 			$submitter_contents = array();
