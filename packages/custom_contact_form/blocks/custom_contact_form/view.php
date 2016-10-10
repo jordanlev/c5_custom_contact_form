@@ -37,7 +37,6 @@ $(document).ready(function() {
 				$('#<?php echo $dom_id; ?> .processing').hide();
 				$('#<?php echo $dom_id; ?> form').fadeOut('', function() {
 					$('#<?php echo $dom_id; ?> .success').fadeIn();
-					$('#<?php echo $dom_id; ?> form').clearForm();
 				});
 			} else { //validation error
 				var errorItems = '';
