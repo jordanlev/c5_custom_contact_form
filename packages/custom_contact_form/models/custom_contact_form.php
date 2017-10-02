@@ -481,7 +481,9 @@ class CustomContactFormSubmission {
 		
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true );
+		if (!ini_get('open_basedir')) { //CURLOPT_FOLLOWLOCATION cannot be activated when an open_basedir is set
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true );
+		}
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true );
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($ch, CURLOPT_POST, true);
